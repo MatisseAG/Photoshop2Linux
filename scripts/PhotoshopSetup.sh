@@ -2,85 +2,85 @@
 
 function main(){
     
-    SCR_PATH="$HOME/.photoshopCCV19"
-    CACHE_PATH="$HOME/.cache/photoshopCCV19"
+    SCR_PATH="$HOME/.photoshop2linux"
+    CACHE_PATH="$HOME/.cache/photoshop2linux"
     
     mkdir -p $SCR_PATH
     mkdir -p $CACHE_PATH
     
-    setup_log "================| script executed |================"
+    setup_log "================| script exécuté |================"
     
     check_arg $1
     is64
 
-    #make sure aria2c and wine package is already installed 
+    #vérification que aria2c et wine sont bien installé
     package_installed aria2c
     package_installed wine
     package_installed md5sum
     package_installed winetricks
 
-    #delete wine3.4 dir if exist then create it
+    #supprime le répertoire wine3.4 si il existe puis le créer
     WINE_PATH="$SCR_PATH/wine-3.4"
     rmdir_if_exist $WINE_PATH
 
     RESOURCES_PATH="$SCR_PATH/resources"
     WINE_PREFIX="$SCR_PATH/prefix"
 
-    #install wine 3.4
+    #installe wine 3.4
     install_wine34
     
-    #create new wine prefix for photoshop
+    #créer un nouveau préfix wine pour photoshop
     rmdir_if_exist $WINE_PREFIX
     
-    #export necessary variable for wine 3.4
+    #exporte les variables nécessaire pour wine 3.4
     export_var
     
-    #config wine prefix and install mono and gecko automatic
-    echo -e "\033[1;93mplease allow mono and gecko packages to be installed automatically\e[0m"
-    echo -e "\033[1;93mif they're not already installed then click on OK button\e[0m"
+    #configure le préfix wine et installe mono et gecko automatiquement
+    echo -e "\033[1;93mVeuillez autoriser l'installation automatique des packages mono et gecko\e[0m"
+    echo -e "\033[1;93mS'ils ne sont pas déjà installés, cliquez sur le bouton OK\e[0m"
     winecfg 2> "$SCR_PATH/wine-error.log"
     if [ $? -eq 0 ];then
-        show_message "prefix configured..."
+        show_message "Préfix Wine configuré..."
         sleep 5
     else
-        error "prefix config failed :("
+        error "La configuration du préfix wine à échoué :("
     fi
     
     if [ -f "$WINE_PREFIX/user.reg" ];then
-        #add necessary dlls
+        #ajoute les dll nécessaire
         append_DLL
         sleep 4
-        #add dark mod
+        #ajoute le dark mode
         set_dark_mod
     else
-        error "user.reg Not Found :("
+        error "user.reg Introuvable :("
     fi
    
-    #create resources directory 
+    #créer le répertoire des ressources
     rmdir_if_exist $RESOURCES_PATH
 
-    # winetricks atmlib corefonts fontsmooth=rgb gdiplus vcrun2008 vcrun2010 vcrun2012 vcrun2013 vcrun2015 atmlib msxml3 msxml6 gdiplus
+    #installe les composant nécessaire avec winetricks
     winetricks atmlib fontsmooth=rgb vcrun2008 vcrun2010 vcrun2012 vcrun2013 vcrun2015 atmlib msxml3 msxml6
-    #install photoshop
+    #installe photoshop
     sleep 3
     install_photoshopSE
     sleep 5
 
-    echo -e "\033[1;93mSelect \"Windwos 7\" for windows version and then click OK\e[0m"
+    echo -e "\033[1;93mVeuillez séléctionnez \"Windows 7\" comme version de windows wine et cliquez sur OK\e[0m"
     winecfg
     
     replacement
 
     if [ -d $RESOURCES_PATH ];then
-        show_message "deleting resources folder"
+        show_message "Suppression du répertoire des resources"
         rm -rf $RESOURCES_PATH
     else
-        error "resources folder Not Found"
+        error "Dossier des resources Introuvable :("
     fi
 
     launcher
-    show_message "\033[1;33mwhen you run photoshop for the first time it may take a while\e[0m"
-    show_message "Almost Finish..."
+    show_message "\033[1;33mLorsque vous exécutez Photoshop pour la première fois, cela peut prendre un certain temps\e[0m"
+    show_message "Bientôt finis..."
     sleep 30
 }
 
@@ -94,13 +94,13 @@ function show_message(){
 }
 
 function error(){
-    echo -e "\033[1;31merror:\e[0m $@"
+    echo -e "\033[1;31mErreur:\e[0m $@"
     setup_log "$@"
     exit 1
 }
 
 function warning(){
-    echo -e "\033[1;33mWarning:\e[0m $@"
+    echo -e "\033[1;33mAttention:\e[0m $@"
     setup_log "$@"
 }
 
@@ -109,37 +109,37 @@ function launcher(){
     rmdir_if_exist "$SCR_PATH/launcher"
 
     if [ -f "$launcher_path" ];then
-        show_message "launcher.sh detected..."
-        cp "$launcher_path" "$SCR_PATH/launcher" || error "can't copy launcher"
+        show_message "launcher.sh Détecté..."
+        cp "$launcher_path" "$SCR_PATH/launcher" || error "Impossible de copier le lanceur"
         chmod +x "$SCR_PATH/launcher/launcher.sh"
     else
-        error "launcher.sh Note Found"
+        error "launcher.sh Introuvable :("
     fi
 
-    #create desktop entry
+    #créer le raccourcis de lancement
     local desktop_entry="$PWD/photoshop.desktop"
     local desktop_entry_dest="/usr/share/applications/photoshop.desktop"
     
     if [ -f "$desktop_entry" ];then
-        show_message "desktop entry detected..."
-        #delete desktop entry if exists
+        show_message "Lanceur de Photoshop déja présent..."
+        #supprime le lanceur si il est existant
         if [ -f "$desktop_entry_dest" ];then
-            show_message "desktop entry exist deleted..."
+            show_message "Suppresion du lanceur de Photoshop déja existant..."
             sudo rm "$desktop_entry_dest"
         fi
-        sudo cp "$desktop_entry" "/usr/share/applications" || error "can't copy desktop entry"
-        sudo sed -i "s|gictorbit|$HOME|g" "$desktop_entry_dest" || error "can't edit desktop entry"
+        sudo cp "$desktop_entry" "/usr/share/applications" || error "Impossible de copier le lanceur de Photoshop :("
+        sudo sed -i "s|gictorbit|$HOME|g" "$desktop_entry_dest" || error "Impossible d'éditer le lanceur de Photoshop :("
     else
-        error "desktop entry Not Found"
+        error "Lanceur de Photoshop Introuvable :("
     fi
 
-    #create photoshop command
-    show_message "create photoshop command..."
+    #créer la commande photoshop
+    show_message "Création de la commande de lancement Photoshop..."
     if [ -f "/usr/local/bin/photoshop" ];then
-        show_message "photoshop command exist deleted..."
+        show_message "Suppresion de la version existante de la commande..."
         sudo rm "/usr/local/bin/photoshop"
     fi
-    sudo ln -s "$SCR_PATH/launcher/launcher.sh" "/usr/local/bin/photoshop" || error "can't create photoshop command"
+    sudo ln -s "$SCR_PATH/launcher/launcher.sh" "/usr/local/bin/photoshop" || error "Impossible de créer la commande Photoshop :("
 
     unset desktop_entry desktop_entry_dest launcher_path
 }
@@ -153,7 +153,7 @@ function replacement(){
     download_component $filepath $filemd5 $filelink $filename
 
     mkdir "$RESOURCES_PATH/replacement"
-    show_message "extract replacement component..."
+    show_message "Extraction du composant de remplacement..."
     tar -xzf $filepath -C "$RESOURCES_PATH/replacement"
 
     local replacefiles=("IconResources.idx" "PSIconsHighRes.dat" "PSIconsLowRes.dat")
@@ -161,10 +161,10 @@ function replacement(){
     
     for f in "${replacefiles[@]}";do
         local sourcepath="$RESOURCES_PATH/replacement/$f"
-        cp -f "$sourcepath" "$destpath" || error "cant copy replacement $f file..."
+        cp -f "$sourcepath" "$destpath" || error "Impossible de copier le fichier de remplacement $f :(..."
     done
 
-    show_message "replace component compeleted..."
+    show_message "Composant de remplacement supprimé..."
     unset filename filemd5 filelink filepath
 }
 
@@ -180,14 +180,14 @@ function install_photoshopSE(){
     show_message "extract photoshop..."
     tar -xzf $filepath -C "$RESOURCES_PATH/photoshopCC"
 
-    echo "===============| photoshop CC v19 |===============" >> "$SCR_PATH/wine-error.log"
-    show_message "install photoshop..."
-    show_message "\033[1;33mPlease don't change default Destination Folder\e[0m"
+    echo "===============| Photoshop2Linux |===============" >> "$SCR_PATH/wine-error.log"
+    show_message "installation de Adobe Photoshop CC 2018..."
+    show_message "\033[1;33mS'il vous plaît, ne changer pas le répertoire d'installation de Photoshop\e[0m"
 
-    wine "$RESOURCES_PATH/photoshopCC/photoshop_cc.exe" &>> "$SCR_PATH/wine-error.log" || error "sorry something went wrong during photoshop installation"
+    wine "$RESOURCES_PATH/photoshopCC/photoshop_cc.exe" &>> "$SCR_PATH/wine-error.log" || error "Quelque chose ne c'est pas passer comme prévus lors de l'installation de Photoshop"
 
-    notify-send "photoshop installed successfully" -i "photoshop"
-    show_message "photoshopCC V19 x64 installed..."
+    notify-send "L'installation de Adobe Photoshop CC 2018 à réussi" -i "photoshop"
+    show_message "Adobe Photoshop CC 2018 installé..."
     unset filename filemd5 filelink filepath
 }
 
@@ -230,7 +230,7 @@ function set_dark_mod(){
     for i in "${colorarray[@]}";do
         echo "$i" >> "$WINE_PREFIX/user.reg"
     done
-    show_message "set dark mode for wine..." 
+    show_message "Définition du dark mode pour Wine..." 
     unset colorarray
 }
 
@@ -265,7 +265,7 @@ function append_DLL(){
         '"vcomp110"="native,builtin"'
         '"vcomp120"="native,builtin"' 
     )
-    show_message "add necessary DLLs..."
+    show_message "Ajouts des DLLs nécessaires..."
     echo " " >> "$WINE_PREFIX/user.reg"
     for i in ${dllarray[@]};do
         echo "$i" >> "$WINE_PREFIX/user.reg"
@@ -277,18 +277,18 @@ function export_var(){
     export WINEPREFIX="$WINE_PREFIX"
     export PATH="$WINE_PATH/bin:$PATH"
     export LD_LIBRARY_PATH="$WINE_PATH/lib:$LD_LIBRARY_PATH"
-    # export WINEDLLOVERRIDES="winemenubuilder.exe=d"
+    # exportation de WINEDLLOVERRIDES="winemenubuilder.exe=d"
     export WINESERVER="$WINE_PATH/bin/wineserver"
     export WINELOADER="$WINE_PATH/bin/wine"
     export WINEDLLPATH="$WINE_PATH/lib/wine"
     
-    show_message "wine variables exported..."
+    show_message "Les variables de Wine ont bien été exporté..."
     local wine_version=$(wine --version)
     
     if [ $wine_version == "wine-3.4" ];then
-        show_message "wine 3.4 is configured..."
+        show_message "La configuration de Wine à réussi..."
     else
-        error "wine 3.4 config is wrong"
+        error "La configuration de Wine à échoué :("
     fi
 }
 
@@ -300,31 +300,31 @@ function install_wine34(){
     local filelink="http://www.playonlinux.com/wine/binaries/phoenicis/upstream-linux-amd64/PlayOnLinux-wine-3.4-upstream-linux-amd64.tar.gz"
     download_component $filepath $filemd5 $filelink $filename 
     tar -xzf $filepath -C $WINE_PATH
-    show_message "wine 3.4 installed..."
+    show_message "L'installation de Wine à réussi..."
     unset filename filepath filemd5 filelink
 }
 
-#parameters is [PATH] [CheckSum] [URL] [FILE NAME]
+#les paramètres sont [PATH] [CheckSum] [URL] [FILE NAME]
 function download_component(){
     local tout=0
     while true;do
         if [ $tout -ge 2 ];then
-            error "sorry somthing went wrong during download $4"
+            error "Désolé, quelque chose c'est mal passé durant le téléchargement $4"
         fi
         if [ -f $1 ];then
             local FILE_ID=$(md5sum $1 | cut -d" " -f1)
             if [ "$FILE_ID" == $2 ];then
-                show_message "\033[1;36m$4\e[0m detected"
+                show_message "\033[1;36m$4\e[0m détécté"
                 return 1
             else
-                show_message "md5 is not match"
+                show_message "Le fichier téléchargé est corrompu"
                 rm $1 
             fi
         else   
-            show_message "downloading $4 ..."
+            show_message "Téléchargement de $4 ..."
             aria2c -c -x 8 -d $CACHE_PATH -o $4 $3
             if [ $? -eq 0 ];then
-                notify-send "$4 download completed" -i "download"
+                notify-send "$4 à été téléchargé" -i "download"
             fi
             ((tout++))
         fi
@@ -334,39 +334,39 @@ function download_component(){
 function rmdir_if_exist(){
     if [ -d "$1" ];then
         rm -rf $1
-        show_message "\033[0;36m$1\e[0m directory exists deleting it..."
+        show_message "\033[0;36m$1\e[0m Le répertoire est déja existant, supression de la version existante..."
     fi
     mkdir $1
-    show_message "create\033[0;36m $1\e[0m directory..."
+    show_message "Création\033[0;36m $1\e[0m du répertoire..."
 }
 
 function check_arg(){
     if [ $1 != 0 ]
     then
-        error "It haven't any parameter just execute script"
+        error "Il n'y a aucun arguments à inséré, il suffit d'exécuter le script"
     fi
-    show_message "argument checked..."
+    show_message "Les arguments ont été vérifiés..."
 }
 
 function is64(){
     local arch=$(uname -m)
     if [ $arch != "x86_64"  ];then
-        warning "your distro is not 64 bit"
-        read -r -p "Would you continue? [N/y] " response
+        warning "Votre configuration d'ordinateur en x86 ne permet pas l'installation de Photoshop"
+        read -r -p "Voulez-vous continuez [N/y] " response
         if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]];then
-           echo "Good Bye!"
+           echo "Au revoir :)"
            exit 0
         fi
     fi
-   show_message "is64 checked..."
+   show_message "L'architecture de l'ordinateur x64 est correcte..."
 }
 
 function package_installed(){
     local which=$(which $1 2>/dev/null)
     if [ "$which" == "/usr/bin/$1" ];then
-        show_message "package\033[1;36m $1\e[0m is installed..."
+        show_message "La paquet\033[1;36m $1\e[0m est installé..."
     else
-        error "package\033[1;33m $1\e[0m is not installed.\nplease install it and Try again"
+        error "Le paquet\033[1;33m $1\e[0m à échoué lors de l'installation.\nS'il vous plaît, veuillez réessayé"
     fi
 }
 
