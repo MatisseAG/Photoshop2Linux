@@ -12,30 +12,30 @@ function main(){
     case "$answer" in
 
     1)  
-        echo "run photoshop CC Installation..."
-        echo -n "using winetricks for component installation..."
+        echo "Lancement de l'installation de Photoshop CC 2018..."
+        echo -n "En utilisant winetrick comme utilitaire d'installation..."
         run_script "scripts/PhotoshopSetup.sh" "PhotoshopSetup.sh"
         ;;
     2)  
-        echo "run photoshop CC Installation..."
-        echo -n "using custom script for component installation..."
+        echo "Lancement de l'installation de Photoshop CC 2018..."
+        echo -n "En utilisant le script customisé comme utilitaire d'installation..."
         run_script "scripts/PhotoshopSetupCustom.sh" "PhotoshopSetupCustom.sh"
         ;;
     3)  
-        echo -n "run adobe camera Raw installer"
+        echo -n "Lancement de l'installation de Adobe Camera Raw v12..."
         run_script "scripts/cameraRawInstaller.sh" "cameraRawInstaller.sh"
         ;;
     4)  
-        echo "run winecfg..."
-        echo -n "open virtualdrive configuration..."
+        echo "Lancement de winecfg..."
+        echo -n "Ouverture de la configuration du disque virtuel..."
         run_script "scripts/winecfg.sh" "winecfg.sh"
         ;;
     5)  
-        echo -n "uninstall photoshop CC ..."
+        echo -n "Désinstallation de Photoshop......"
         run_script "scripts/uninstaller.sh" "uninstaller.sh"
         ;;
     6)  
-        echo "exit setup..."
+        echo "Fermeture de l'installateur..."
         exitScript
         ;;
     esac
@@ -49,10 +49,10 @@ function run_script(){
 
     wait_second 5
     if [ -f "$script_path" ];then
-        echo "$script_path Found..."
+        echo "$script_path Trouvé..."
         chmod +x "$script_path"
     else
-        error "$script_name not Found..."    
+        error "$script_name Non trouvé..."    
     fi
     cd "./scripts/" && sh $script_name
     unset script_path
@@ -68,18 +68,18 @@ function wait_second(){
 
 function read_input(){
     while true ;do
-        read -p "[choose an option]$ " choose
+        read -p "[Choissisez une option]$ " choose
         if [[ "$choose" =~ (^[1-6]$) ]];then
             break
         fi
-        warning "choose a number between 1 to 6"
+        warning "Choissisez un nombre entre 1 et 6 qui correspond à l'action que vous voulez effectuer"
     done
 
     return $choose
 }
 
 function exitScript(){
-    echo "Good Bye :)"
+    echo "Au revoir :)"
 }
 
 function banner(){
@@ -89,7 +89,7 @@ function banner(){
         cat $banner_path
         echo ""
     else
-        error "banner not Found..."
+        error "Bannière non trouvé..."
     fi
     unset banner_path
 }
