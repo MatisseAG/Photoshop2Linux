@@ -61,7 +61,7 @@ chmod +x setup.sh
 ```
 <div align="center" class="tip" markdown="1" style>
 
-![setup-screenshot](images/setup-screenshot.png)
+![setup-screenshot](images/script.png)
 </div>
 
 Lors de l'installation, veuillez faire attention aux messages d'erreur qui peuvent résoudre un éventuelle problème
